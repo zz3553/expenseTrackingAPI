@@ -21,3 +21,11 @@ def read_expense(expense_id: int, database: Session = Depends(db.get_db)):
     if not expense:
         raise HTTPException(status_code=404, detail="Expense not found")
     return expense
+
+@router.put('/{expense_id}', response_model=schemas.ExpenseResponse)
+def update_expense(
+        expense_id: int,
+        updates: schemas.ExpenseUpdate,
+        database: Session = Depends(db.get_db)
+):
+    return crud.update_expense(database, expense_id, updates)
