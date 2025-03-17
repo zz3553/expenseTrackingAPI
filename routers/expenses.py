@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from typing import List
 
@@ -11,9 +11,11 @@ router = APIRouter(prefix="/expenses", tags=["expenses"])
 def create_expense(expense: schemas.ExpenseCreate, database: Session = Depends(db.get_db)):
     return crud.create_expense(database, expense)
 
+
 @router.get("/", response_model=List[schemas.ExpenseResponse])
-def get_expenses(database: Session = Depends(db.get_db)):
-    return crud.get_expenses(database)
+def get_expenses(limit: int = Query(10, gt=0), database: Session = Depends(db.get_db)):
+    return crud.get_last_x_expenses(database, limit=limit)
+
 
 @router.get("/{expense_id}", response_model=schemas.ExpenseResponse)
 def get_expense(expense_id: int, database: Session = Depends(db.get_db)):
@@ -22,6 +24,7 @@ def get_expense(expense_id: int, database: Session = Depends(db.get_db)):
         raise HTTPException(status_code=404, detail="Expense not found")
     return expense
 
+
 @router.put("/{expense_id}", response_model=schemas.ExpenseResponse)
 def update_expense(
         expense_id: int,
@@ -29,6 +32,7 @@ def update_expense(
         database: Session = Depends(db.get_db)
 ):
     return crud.update_expense(database, expense_id, updates)
+
 
 @router.delete("/{expense_id}", response_model=schemas.ExpenseResponse)
 def delete_expense(

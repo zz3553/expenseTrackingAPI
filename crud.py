@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from sqlalchemy import select
+from sqlalchemy import select, desc
 from . import models, schemas
 
 def create_expense(db: Session, expense: schemas.ExpenseCreate):
@@ -9,8 +9,8 @@ def create_expense(db: Session, expense: schemas.ExpenseCreate):
     db.refresh(db_expense)
     return db_expense
 
-def get_expenses(db: Session, skip: int = 0, limit: int = 10):
-    stmt = select(models.Expense).offset(skip).limit(limit)
+def get_last_x_expenses(db: Session, skip: int = 0, limit: int = 10):
+    stmt = select(models.Expense).order_by(desc(models.Expense.updated_at)).offset(skip).limit(limit)
     return db.execute(stmt).scalars().all()
 
 def get_expense(db: Session, expense_id: int):
