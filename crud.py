@@ -1,6 +1,20 @@
+from datetime import datetime
+
 from sqlalchemy.orm import Session
 from sqlalchemy import select, desc
-from . import models, schemas
+import models, schemas
+import logging
+# Basic logging configuration
+logging.basicConfig(
+    level=logging.INFO,  # or DEBUG
+    format="%(asctime)s - %(levelname)s - %(message)s",
+)
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+
+logging.basicConfig.disable_existing_loggers = False
+
 
 def create_expense(db: Session, expense: schemas.ExpenseCreate):
     db_expense = models.Expense(**expense.model_dump())
@@ -9,8 +23,25 @@ def create_expense(db: Session, expense: schemas.ExpenseCreate):
     db.refresh(db_expense)
     return db_expense
 
-def get_last_x_expenses(db: Session, skip: int = 0, limit: int = 10):
-    stmt = select(models.Expense).order_by(desc(models.Expense.updated_at)).offset(skip).limit(limit)
+def get_last_x_expenses(
+        db: Session,
+        skip: int = 0,
+        limit: int = 10,
+        start_date: datetime = datetime.min,
+        end_date: datetime = datetime.max
+):
+    stmt = (
+        select(models.Expense)
+        .order_by(desc(models.Expense.updated_at))
+        .offset(skip)
+        .limit(limit)
+        .where(models.Expense.updated_at >= start_date)
+        .where(models.Expense.updated_at <= end_date)
+    )
+    return db.execute(stmt).scalars().all()
+
+def get_expense_by_category(db: Session, category: str):
+    stmt = select(models.Expense).where(models.Expense.type == category)
     return db.execute(stmt).scalars().all()
 
 def get_expense(db: Session, expense_id: int):
