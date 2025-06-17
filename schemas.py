@@ -19,3 +19,19 @@ class ExpenseResponse(ExpenseBase):
 
     class Config:
         from_attributes = True
+
+class UserBase(BaseModel):
+    pass
+
+class UserCreate(UserBase):
+    pass
+
+class UserUpdate(UserBase):
+    pass
+
+class UserResponse(UserBase):
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
