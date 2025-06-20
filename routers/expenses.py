@@ -29,7 +29,6 @@ def get_expenses(
 ):
     start_date = datetime.strptime(start_date, "%m/%d/%Y") if start_date else datetime.min
     end_date = datetime.strptime(end_date, "%m/%d/%Y").replace(hour=23, minute=59, second=59) if end_date else datetime.max
-
     return expense_crud.get_last_x_expenses(
         database,
         limit=limit,
